@@ -27,9 +27,9 @@ from firebase_admin.exceptions import FirebaseError
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from backend.POPO.Secrets import Secrets
-from backend.database import AiohttpSingleton
-from backend.utils import parse_url
+from ppo.POPO.Secrets import Secrets
+from ppo.database import AiohttpSingleton
+from ppo.utils import parse_url
 
 router = APIRouter()
 

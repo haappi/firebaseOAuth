@@ -19,7 +19,7 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-from backend.utils import get_mongo_instance
+from ppo.utils import get_mongo_instance
 
 load_dotenv()
 
