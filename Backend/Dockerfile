@@ -23,7 +23,7 @@ ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
 
 RUN apk update
 RUN apk upgrade
-RUN apk add --no-cache g++ build-base libssl-dev libffi-dev python-dev build-essential
+RUN apk add --no-cache g++ build-base libffi-dev alpine-sdk
 
 WORKDIR /code
 
