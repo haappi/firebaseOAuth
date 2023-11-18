@@ -21,7 +21,7 @@ jobs:
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
           ALLOWED_DOMAINS: ${{ secrets.ALLOWED_DOMAINS }}
         run: |
-          cd Backend/
+          cd backend/
           docker build --build-arg MONGO_DB_NAME=$MONGO_DB_NAME \
                        --build-arg MONGO_URI=$MONGO_URI \
                        --build-arg GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
