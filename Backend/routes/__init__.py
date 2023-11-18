@@ -17,9 +17,9 @@
 
 from fastapi import APIRouter
 
-from routes.dashboard import router as dashboard_router
-from routes.onboarding import router as onboarding_router
-from routes.redirect_handler import router as redirect_router
+from Backend.routes.dashboard import router as dashboard_router
+from Backend.routes.onboarding import router as onboarding_router
+from Backend.routes.redirect_handler import router as redirect_router
 
 router = APIRouter(prefix="/school/oauth")
 
