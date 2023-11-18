@@ -35,7 +35,6 @@ router = APIRouter()
 
 
 async def get_keys(uuid: UUID) -> Secrets:
-    return "A"
     data = await get_keys_from_uuid(uuid, decrypt=True)
     if not data:
         raise HTTPException(status_code=404, detail="Redirect URI not found")
@@ -66,7 +65,7 @@ router.route_class = CustomRoute
 
 @router.get("/school/oauth/redirect/{uuid}")
 async def redirect_to_school_oauth(
-    request: Request, code: str, data: Secrets = Depends(get_keys)
+        request: Request, code: str, data: Secrets = Depends(get_keys)
 ):
     return await handle_oauth(
         code=code,
@@ -79,7 +78,7 @@ async def redirect_to_school_oauth(
 
 # @router.get("/school/oauth/refresh/{uuid}/{refresh_token}")
 async def refresh_users_token(
-    request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
+        request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
 ):
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {

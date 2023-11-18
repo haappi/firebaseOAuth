@@ -47,6 +47,7 @@ class MongoSingleton:
     async def close_mongo_connection(cls):
         if cls._instance:
             await cls._instance.close()
+            cls._instance = None
 
 
 class AiohttpSingleton:
@@ -69,3 +70,4 @@ class AiohttpSingleton:
     async def close_aiohttp_connection(cls):
         if cls._instance:
             await cls._instance.close()
+            cls._instance = None

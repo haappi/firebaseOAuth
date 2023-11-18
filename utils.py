@@ -16,6 +16,7 @@
 """
 
 import os
+import traceback
 import typing
 from urllib.parse import urlparse
 from uuid import UUID
@@ -25,8 +26,12 @@ from aiocache import cached
 from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
 from fastapi import HTTPException
+from google.auth import jwt
+from google.auth.exceptions import InvalidValue
+from starlette.responses import RedirectResponse, Response
+from websockets.http11 import Request
 
-from database import MongoSingleton
+from database import MongoSingleton, AiohttpSingleton
 
 load_dotenv()
 
@@ -56,10 +61,10 @@ async def get_keys_from_uuid(uuid: UUID, decrypt=False) -> "Secrets" or None:
     if decrypt:
         for key, value in document.items():
             if "client" in key:
-                document[key] = await decrypt_secret(value)
+                document[key] = decrypt_secret(value)
 
         for key, value in document["firebase_secret"].items():
-            document["firebase_secret"][key] = await decrypt_secret(value)
+            document["firebase_secret"][key] = decrypt_secret(value)
 
     return Secrets(**document)
 
@@ -71,18 +76,18 @@ async def insert_key(uuid: UUID, secret: "Secrets"):
     document = secret.model_dump()
     for key, value in document.items():
         if "client" in key:
-            document[key] = await encrypt_secret(value)
+            document[key] = encrypt_secret(value)
     for key, value in document["firebase_secret"].items():
-        document["firebase_secret"][key] = await encrypt_secret(value)
+        document["firebase_secret"][key] = encrypt_secret(value)
     document["uuid"] = str(uuid)
     await collection.insert_one(document)
 
 
-async def encrypt_secret(secret: str) -> str:
+def encrypt_secret(secret: str) -> str:
     return cipher_suite.encrypt(secret.encode("utf-8")).decode("utf-8")
 
 
-async def decrypt_secret(secret: str) -> str:
+def decrypt_secret(secret: str) -> str:
     try:
         return cipher_suite.decrypt(secret.encode("utf-8")).decode("utf-8")
     except InvalidToken:
@@ -92,3 +97,48 @@ async def decrypt_secret(secret: str) -> str:
 def parse_url(url: str) -> str:
     parsed_url = urlparse(url)
     return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+
+
+async def fetch_google_creds():
+    session = await AiohttpSingleton.get_instance()
+    response = await session.get(
+        "https://www.googleapis.com/oauth2/v1/certs",
+    )
+    response_json = await response.json()
+    return response_json
+
+
+async def verify_google_jwt(token, client_id):
+    try:
+        decoded_token = jwt.decode(
+            token,
+            await fetch_google_creds(),
+            audience=client_id,
+            clock_skew_in_seconds=30
+        )
+        return decoded_token
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def refresh_users_token(
+        request: Request, refresh_token: str, response: Response
+):
+    print('refreshing token')
+    token_url = "https://accounts.google.com/o/oauth2/token"
+    data = {
+        "refresh_token": refresh_token,
+        "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+        "grant_type": "refresh_token",
+    }
+    client = await AiohttpSingleton.get_instance()
+
+    refresh_response = await client.post(token_url, data=data)
+    refresh_response_json = await refresh_response.json()
+
+    response.set_cookie("refresh_token", encrypt_secret(refresh_response_json.get('refresh_token')), httponly=True, secure=True)
+    response.set_cookie("jwt", encrypt_secret(refresh_response_json.get('id_token')), httponly=True, secure=True)
+
+    return refresh_response_json

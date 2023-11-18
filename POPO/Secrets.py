@@ -23,6 +23,7 @@ class Secrets(BaseModel):
     client_id: str
     client_secret: str
     firebase_secret: dict[str, str]
+    auto_firebase: bool
     owner: str
 
     def model_dump(self, *args, **kwargs):

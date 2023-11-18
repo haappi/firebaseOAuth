@@ -18,16 +18,26 @@
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Cookie
+from google.auth.exceptions import InvalidValue
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, Response
 
 from database import AiohttpSingleton
 from routes import router as oauth_router
+from utils import verify_google_jwt, encrypt_secret, decrypt_secret, refresh_users_token
 
 app = FastAPI()
 load_dotenv()
 app.include_router(oauth_router)
+
+
+@app.get("/test")
+async def test(response: Response, request: Request, jwt: str | None = Cookie(None)):
+    try:
+        await verify_google_jwt(decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID"))
+    except InvalidValue:
+        await refresh_users_token(request, decrypt_secret(request.cookies.get('refresh_token')), response)
 
 
 @app.get("/school/oauth/login")
@@ -39,7 +49,7 @@ async def login_google(request: Request):
 
 
 @app.get("/school/oauth/auth")
-async def auth_google(code: str, request: Request):
+async def auth_google(code: str, request: Request, response: Response):
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
         "code": code,
@@ -48,18 +58,20 @@ async def auth_google(code: str, request: Request):
         "redirect_uri": f"{request.url.scheme}://{request.url.netloc}/school/oauth/auth",
         "grant_type": "authorization_code",
     }
-
     client = await AiohttpSingleton.get_instance()
 
-    response = await client.post(token_url, data=data)
-    response_json = await response.json()
-    return response_json
-    access_token = response_json.get("access_token")
+    auth_token = await client.post(token_url, data=data)
+    auth_token_json = await auth_token.json()
+    access_token = auth_token_json.get("access_token")
     user_info = await client.get(
         "https://www.googleapis.com/oauth2/v1/userinfo",
         headers={"Authorization": f"Bearer {access_token}"},
     )
     user_info_json = await user_info.json()
+
+    response.set_cookie("refresh_token", encrypt_secret(auth_token_json.get('refresh_token')), httponly=True, secure=True)
+    response.set_cookie("jwt", encrypt_secret(auth_token_json.get('id_token')), httponly=True, secure=True)
+
     return user_info_json
 
 
