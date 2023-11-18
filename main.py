@@ -34,9 +34,13 @@ app.include_router(oauth_router)
 
 @app.get("/test")
 async def test(response: Response, request: Request, jwt: str | None = Cookie(None)):
+    if not jwt:
+        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
     try:
         await verify_google_jwt(decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID"))
     except InvalidValue:
+        if not request.cookies.get('refresh_token'):
+            return RedirectResponse(url=f"/school/oauth/login", status_code=307)
         await refresh_users_token(request, decrypt_secret(request.cookies.get('refresh_token')), response)
 
 
@@ -44,7 +48,7 @@ async def test(response: Response, request: Request, jwt: str | None = Cookie(No
 async def login_google(request: Request):
     return RedirectResponse(
         url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={request.url.scheme}://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
-        status_code=301,
+        status_code=307,
     )
 
 
@@ -71,7 +75,6 @@ async def auth_google(code: str, request: Request, response: Response):
 
     response.set_cookie("refresh_token", encrypt_secret(auth_token_json.get('refresh_token')), httponly=True, secure=True)
     response.set_cookie("jwt", encrypt_secret(auth_token_json.get('id_token')), httponly=True, secure=True)
-
     return user_info_json
 
 

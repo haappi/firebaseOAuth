@@ -84,10 +84,14 @@ async def insert_key(uuid: UUID, secret: "Secrets"):
 
 
 def encrypt_secret(secret: str) -> str:
+    if not secret:
+        return ""
     return cipher_suite.encrypt(secret.encode("utf-8")).decode("utf-8")
 
 
 def decrypt_secret(secret: str) -> str:
+    if not secret:
+        return ""
     try:
         return cipher_suite.decrypt(secret.encode("utf-8")).decode("utf-8")
     except InvalidToken:
@@ -138,7 +142,7 @@ async def refresh_users_token(
     refresh_response = await client.post(token_url, data=data)
     refresh_response_json = await refresh_response.json()
 
-    response.set_cookie("refresh_token", encrypt_secret(refresh_response_json.get('refresh_token')), httponly=True, secure=True)
+    response.set_cookie("refresh_token", encrypt_secret(refresh_token), httponly=True, secure=True)
     response.set_cookie("jwt", encrypt_secret(refresh_response_json.get('id_token')), httponly=True, secure=True)
 
     return refresh_response_json
