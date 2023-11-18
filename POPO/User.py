@@ -24,26 +24,20 @@ from utils import get_mongo_instance
 load_dotenv()
 
 
-class Secrets(BaseModel):
-    client_id: str
-    client_secret: str
-    firebase_secret: dict[str, str]
-    auto_firebase: bool
-    owner: str
-    uuid: str | None
+class User(BaseModel):
+    user_id: str
+    email: str
+    name: str
+    secrets: list[str]
+    limit: int
 
     def model_dump(self, *args, **kwargs):
         return super().model_dump(*args, **kwargs, by_alias=True)
 
-    async def delete(self):
+    async def save(self):
         mongo = await get_mongo_instance()
         db = mongo[os.getenv("MONGO_DB_NAME")]
-        collection = db["secrets"]
-        await collection.delete_one({'uuid': self.uuid})
-
-    async def update(self):
-        mongo = await get_mongo_instance()
-        db = mongo[os.getenv("MONGO_DB_NAME")]
-        collection = db["secrets"]
+        collection = db["users"]
         document = self.model_dump()
-        await collection.update_one({"uuid": self.uuid}, {"$set": document}, upsert=True)
+
+        await collection.update_one({"user_id": self.user_id}, {"$set": document}, upsert=True)

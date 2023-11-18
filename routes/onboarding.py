@@ -21,6 +21,7 @@ from fastapi import APIRouter, HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
+from POPO.User import User
 from database import AiohttpSingleton
 from utils import encrypt_secret
 
@@ -61,6 +62,9 @@ async def auth_google(code: str, request: Request, response: Response):
         user_info_json['hd'] = user_info_json['email'].split('@')[-1]
     if user_info_json['hd'] not in os.getenv('ALLOWED_DOMAINS'):
         return HTTPException(status_code=403, detail="Your domain is not allowed to access this site.")
+
+    user = User(user_id=user_info_json['id'], email=user_info_json['email'], name=user_info_json['name'], secrets=[], limit=1)
+    await user.save()
 
     response.set_cookie("refresh_token", encrypt_secret(auth_token_json.get('refresh_token')), httponly=True, secure=True)
     response.set_cookie("jwt", encrypt_secret(auth_token_json.get('id_token')), httponly=True, secure=True)

@@ -39,6 +39,7 @@ cipher_suite = Fernet(os.getenv("ENCRYPTION_KEY"))
 
 if typing.TYPE_CHECKING:
     from POPO.Secrets import Secrets
+    from POPO.User import User
 
 load_dotenv()
 
@@ -73,14 +74,34 @@ async def insert_key(uuid: UUID, secret: "Secrets"):
     mongo = await get_mongo_instance()
     db = mongo[os.getenv("MONGO_DB_NAME")]
     collection = db["secrets"]
+    secret.uuid = str(uuid)
     document = secret.model_dump()
     for key, value in document.items():
         if "client" in key:
             document[key] = encrypt_secret(value)
     for key, value in document["firebase_secret"].items():
         document["firebase_secret"][key] = encrypt_secret(value)
-    document["uuid"] = str(uuid)
+
     await collection.insert_one(document)
+
+
+async def retrieve_user(user_id: str) -> "User" or None:
+    mongo = await get_mongo_instance()
+    db = mongo[os.getenv("MONGO_DB_NAME")]
+    collection = db["users"]
+    document = await collection.find_one({"user_id": user_id})
+    if not document:
+        return None
+
+    return User(**document)
+
+
+async def get_secrets_for_user(user_id: str) -> typing.List["Secrets"]:
+    mongo = await get_mongo_instance()
+    db = mongo[os.getenv("MONGO_DB_NAME")]
+    collection = db["secrets"]
+    documents = collection.find({"user_id": user_id})
+    return [document['uuid'] for document in documents]
 
 
 def encrypt_secret(secret: str) -> str:
