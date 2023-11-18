@@ -1,4 +1,3 @@
-import pprint
 from typing import Callable
 from urllib.parse import urlparse
 from uuid import UUID
@@ -73,13 +72,11 @@ async def handle_oauth(**kwargs):
 
     response = await client.post(token_url, data=data)
     response_json = await response.json()
-    pprint.pp(response_json)
 
     access_token = response_json.get("access_token")
     user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
                                  headers={"Authorization": f"Bearer {access_token}"})
     user_info_json = await user_info.json()
-    pprint.pp(user_info_json)
 
     return_string = "exp://"
 
