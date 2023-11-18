@@ -27,8 +27,8 @@ from firebase_admin.exceptions import FirebaseError
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from Backend.POPO.Secrets import Secrets
-from Backend.database import AiohttpSingleton
+from backend.POPO.Secrets import Secrets
+from backend.database import AiohttpSingleton
 
 router = APIRouter()
 

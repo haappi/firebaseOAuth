@@ -21,7 +21,7 @@ from uuid import UUID
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-from Backend.utils import get_mongo_instance, encrypt_secret, decrypt_secret
+from backend.utils import get_mongo_instance, encrypt_secret, decrypt_secret
 
 load_dotenv()
 

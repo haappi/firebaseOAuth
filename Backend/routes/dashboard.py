@@ -25,9 +25,9 @@ from google.auth.exceptions import InvalidValue
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
-from Backend.POPO.Secrets import Secrets
-from Backend.POPO.User import User
-from Backend.utils import verify_google_jwt, decrypt_secret, refresh_users_token
+from backend.POPO.Secrets import Secrets
+from backend.POPO.User import User
+from backend.utils import verify_google_jwt, decrypt_secret, refresh_users_token
 
 load_dotenv()
 

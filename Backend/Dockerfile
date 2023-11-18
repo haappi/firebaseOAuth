@@ -1,8 +1,27 @@
 FROM python:3.11.4-alpine3.18
-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ARG MONGO_DB_NAME
 ARG MONGO_URI
 
+ARG GOOGLE_CLIENT_ID
+ARG GOOGLE_CLIENT_SECRET
+
+ARG ENCRYPTION_KEY
+
+ARG ALLOWED_DOMAINS
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ENV MONGO_DB_NAME=${MONGO_DB_NAME}
 ENV MONGO_URI=${MONGO_URI}
+
+ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+
+ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
+
+ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
 
 WORKDIR /code
 
@@ -10,8 +29,8 @@ COPY requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir -r /code/requirements.txt
 
-COPY .. /code
+COPY . /code
 
-EXPOSE 6420
+EXPOSE 8593
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "6420", "--proxy-headers"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8593", "--proxy-headers"]
