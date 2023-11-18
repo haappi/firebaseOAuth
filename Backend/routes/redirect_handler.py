@@ -29,6 +29,7 @@ from starlette.responses import RedirectResponse
 
 from backend.POPO.Secrets import Secrets
 from backend.database import AiohttpSingleton
+from backend.utils import parse_url
 
 router = APIRouter()
 
