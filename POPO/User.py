@@ -15,11 +15,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
-from typing import Any
 
-from bson import ObjectId
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from utils import get_mongo_instance
 
@@ -44,7 +42,9 @@ class User(BaseModel):
         collection = db["users"]
         document = self.model_dump()
 
-        await collection.update_one({"user_id": self.user_id}, {"$set": document}, upsert=True)
+        await collection.update_one(
+            {"user_id": self.user_id}, {"$set": document}, upsert=True
+        )
 
     @staticmethod
     async def retrieve_user(user_id: str) -> "User" or None:

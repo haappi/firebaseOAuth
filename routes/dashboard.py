@@ -1,3 +1,20 @@
+"""
+    Copyright (C) 2023  haappi
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 import os
 import uuid
 from uuid import UUID
@@ -17,15 +34,21 @@ load_dotenv()
 router = APIRouter()
 
 
-async def get_current_user(response: Response, request: Request, jwt: str = Cookie(None)):
+async def get_current_user(
+    response: Response, request: Request, jwt: str = Cookie(None)
+):
     if not jwt:
         return RedirectResponse(url=f"/school/oauth/login", status_code=307)
     try:
-        jwt: dict = await verify_google_jwt(decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID"))
+        jwt: dict = await verify_google_jwt(
+            decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID")
+        )
     except InvalidValue:
-        await refresh_users_token(request, decrypt_secret(request.cookies.get("refresh_token")), response)
+        await refresh_users_token(
+            request, decrypt_secret(request.cookies.get("refresh_token")), response
+        )
 
-    return await User.retrieve_user(jwt['sub'])
+    return await User.retrieve_user(jwt["sub"])
 
 
 async def is_admin(current_user: User = Depends(get_current_user)):
@@ -35,16 +58,26 @@ async def is_admin(current_user: User = Depends(get_current_user)):
 
 
 @router.get("/dashboard")
-async def dashboard_view(response: Response, request: Request,
-                         current_user: User | RedirectResponse = Depends(get_current_user)):
+async def dashboard_view(
+    response: Response,
+    request: Request,
+    current_user: User | RedirectResponse = Depends(get_current_user),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
-    return {"user": current_user.model_dump(), "secrets": await Secrets.get_secrets_for_user(current_user.user_id)}
+    return {
+        "user": current_user.model_dump(),
+        "secrets": await Secrets.get_secrets_for_user(current_user.user_id),
+    }
 
 
 @router.get("/dashboard/{uuid}")
-async def secret_view(response: Response, request: Request, uuid: str,
-                      current_user: User | RedirectResponse = Depends(get_current_user)):
+async def secret_view(
+    response: Response,
+    request: Request,
+    uuid: str,
+    current_user: User | RedirectResponse = Depends(get_current_user),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     try:
@@ -61,8 +94,12 @@ async def secret_view(response: Response, request: Request, uuid: str,
 
 
 @router.delete("/dashboard/{uuid}")
-async def delete_secret(response: Response, request: Request, uuid: str,
-                        current_user: User | RedirectResponse = Depends(get_current_user)):
+async def delete_secret(
+    response: Response,
+    request: Request,
+    uuid: str,
+    current_user: User | RedirectResponse = Depends(get_current_user),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     try:
@@ -80,8 +117,11 @@ async def delete_secret(response: Response, request: Request, uuid: str,
 
 
 @router.post("/dashboard/create")
-async def create_secret(response: Response, request: Request,
-                        current_user: User | RedirectResponse = Depends(get_current_user)):
+async def create_secret(
+    response: Response,
+    request: Request,
+    current_user: User | RedirectResponse = Depends(get_current_user),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     if len(current_user.secrets) >= current_user.limit:
@@ -103,26 +143,41 @@ async def create_secret(response: Response, request: Request,
 
 
 @router.get("/admin")
-async def admin(response: Response, request: Request, current_user: User | RedirectResponse = Depends(is_admin)):
+async def admin(
+    response: Response,
+    request: Request,
+    current_user: User | RedirectResponse = Depends(is_admin),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     return {"all_users": await User.get_all_users()}
 
 
 @router.get("/admin/{user_id}")
-async def admin_profile_viewer(response: Response, request: Request, user_id: str,
-                               current_user: User | RedirectResponse = Depends(is_admin)):
+async def admin_profile_viewer(
+    response: Response,
+    request: Request,
+    user_id: str,
+    current_user: User | RedirectResponse = Depends(is_admin),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     user = await User.retrieve_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"user": user.model_dump(), "secrets": await Secrets.get_secrets_for_user(user.user_id)}
+    return {
+        "user": user.model_dump(),
+        "secrets": await Secrets.get_secrets_for_user(user.user_id),
+    }
 
 
 @router.delete("/admin/{user_id}")
-async def admin_profile_viewer(response: Response, request: Request, user_id: str,
-                               current_user: User | RedirectResponse = Depends(is_admin)):
+async def admin_profile_viewer(
+    response: Response,
+    request: Request,
+    user_id: str,
+    current_user: User | RedirectResponse = Depends(is_admin),
+):
     if isinstance(current_user, RedirectResponse):
         return current_user
     user = await User.retrieve_user(user_id)

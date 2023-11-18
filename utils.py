@@ -19,15 +19,12 @@ import os
 import traceback
 import typing
 from urllib.parse import urlparse
-from uuid import UUID
 
 import pymongo
-from aiocache import cached
 from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from google.auth import jwt
-from google.auth.exceptions import InvalidValue
 from starlette.responses import RedirectResponse, Response
 from websockets.http11 import Request
 
@@ -38,18 +35,13 @@ load_dotenv()
 cipher_suite = Fernet(os.getenv("ENCRYPTION_KEY"))
 
 if typing.TYPE_CHECKING:
-    from POPO.Secrets import Secrets
-    from POPO.User import User
+    pass
 
 load_dotenv()
 
 
 async def get_mongo_instance() -> pymongo.MongoClient:
     return await MongoSingleton.get_instance()
-
-
-
-
 
 
 def encrypt_secret(secret: str) -> str:
@@ -87,7 +79,7 @@ async def verify_google_jwt(token, client_id):
             token,
             await fetch_google_creds(),
             audience=client_id,
-            clock_skew_in_seconds=30
+            clock_skew_in_seconds=30,
         )
         return decoded_token
     except Exception as e:
@@ -95,9 +87,7 @@ async def verify_google_jwt(token, client_id):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def refresh_users_token(
-        request: Request, refresh_token: str, response: Response
-):
+async def refresh_users_token(request: Request, refresh_token: str, response: Response):
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
         "refresh_token": refresh_token,
@@ -114,7 +104,14 @@ async def refresh_users_token(
 
     refresh_response_json = await refresh_response.json()
 
-    response.set_cookie("refresh_token", encrypt_secret(refresh_token), httponly=True, secure=True)
-    response.set_cookie("jwt", encrypt_secret(refresh_response_json.get('id_token')), httponly=True, secure=True)
+    response.set_cookie(
+        "refresh_token", encrypt_secret(refresh_token), httponly=True, secure=True
+    )
+    response.set_cookie(
+        "jwt",
+        encrypt_secret(refresh_response_json.get("id_token")),
+        httponly=True,
+        secure=True,
+    )
 
     return refresh_response_json

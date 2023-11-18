@@ -18,9 +18,8 @@ import os
 import typing
 from uuid import UUID
 
-from bson import ObjectId
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from utils import get_mongo_instance, encrypt_secret, decrypt_secret
 
@@ -43,14 +42,16 @@ class Secrets(BaseModel):
         mongo = await get_mongo_instance()
         db = mongo[os.getenv("MONGO_DB_NAME")]
         collection = db["secrets"]
-        await collection.delete_one({'uuid': self.uuid})
+        await collection.delete_one({"uuid": self.uuid})
 
     async def update(self):
         mongo = await get_mongo_instance()
         db = mongo[os.getenv("MONGO_DB_NAME")]
         collection = db["secrets"]
         document = self.model_dump()
-        await collection.update_one({"uuid": self.uuid}, {"$set": document}, upsert=True)
+        await collection.update_one(
+            {"uuid": self.uuid}, {"$set": document}, upsert=True
+        )
 
     @staticmethod
     async def get_secrets_for_user(user_id: str) -> typing.List["Secrets"]:

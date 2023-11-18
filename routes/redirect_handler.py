@@ -64,7 +64,7 @@ router.route_class = CustomRoute
 
 @router.get("/redirect/{uuid}")
 async def redirect_to_school_oauth(
-        request: Request, code: str, data: Secrets = Depends(get_keys)
+    request: Request, code: str, data: Secrets = Depends(get_keys)
 ):
     return await handle_oauth(
         code=code,
@@ -77,7 +77,7 @@ async def redirect_to_school_oauth(
 
 # @router.get("/school/oauth/refresh/{uuid}/{refresh_token}")
 async def refresh_users_token(
-        request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
+    request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
 ):
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
@@ -155,7 +155,7 @@ async def handle_oauth(**kwargs):
     for key, value in user_info_json.items():
         return_string += f"?{key}={value}&"
 
-    if kwargs.get('auto_firebase'):
+    if kwargs.get("auto_firebase"):
         return_string += f"firebase_token={generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
 
     return_string = return_string[:-1]
