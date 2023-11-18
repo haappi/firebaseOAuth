@@ -1,28 +1,20 @@
-import uuid
 from typing import Callable
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.routing import APIRoute
-from uuid import UUID
 from starlette.requests import Request
 
-from POPO.Secrets import Secrets
-from utils import insert_key, get_keys_from_uuid
+from utils import get_keys_from_uuid
 
 router = APIRouter()
 
-database = {
-    "some_uuid": {"secret_key": "some_secret_key", "client_id": "some_client_id"},
-    # Add more UUIDs and their corresponding keys and client IDs
-}
 
-
-async def get_key_and_client_id(uuid: UUID = Depends()):
-    if str(uuid) in database:
-        return database[str(uuid)]
-    else:
+async def get_key_and_client_id(uuid: UUID):
+    data = await get_keys_from_uuid(uuid)
+    if not data:
         raise HTTPException(status_code=404, detail="Redirect URI not found")
-
+    return data
 
 def extract_uuid_from_path(request: Request):
     path = request.url.path
@@ -47,10 +39,8 @@ router.route_class = CustomRoute
 
 
 @router.get("/redirect/{uuid}")
-async def redirect_to_school_oauth(uuid: UUID = Depends(get_key_and_client_id)):
+async def redirect_to_school_oauth(uuid: str = Depends(get_key_and_client_id)):
     # secret_key = key_and_client_id["secret_key"]
     # client_id = key_and_client_id["client_id"]
     # return {"uuid": str(uuid), "secret_key": secret_key, "client_id": client_id}
     return {"uuid": str(uuid)}
-
-
