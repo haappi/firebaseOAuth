@@ -1,6 +1,7 @@
 import os
 import typing
 
+import aiohttp
 import motor.motor_asyncio
 from dotenv import load_dotenv
 
@@ -27,5 +28,27 @@ class MongoSingleton:
 
     @classmethod
     async def close_mongo_connection(cls):
+        if cls._instance:
+            await cls._instance.close()
+
+
+class AiohttpSingleton:
+    _instance: typing.Optional[aiohttp.ClientSession] = None
+
+    def __new__(cls):
+        raise NotImplementedError("Cannot instantiate a singleton class.")
+
+    @classmethod
+    async def get_instance(cls) -> aiohttp.ClientSession:
+        if not cls._instance:
+            cls._instance = await cls._connect_to_aiohttp()
+        return cls._instance
+
+    @staticmethod
+    async def _connect_to_aiohttp() -> aiohttp.ClientSession:
+        return aiohttp.ClientSession()
+
+    @classmethod
+    async def close_aiohttp_connection(cls):
         if cls._instance:
             await cls._instance.close()

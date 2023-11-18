@@ -1,19 +1,18 @@
+import os
 import typing
 from uuid import UUID
-import os
+
 import pymongo
 from aiocache import cached
 from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
-import os
-from dotenv import load_dotenv
 from fastapi import HTTPException
+from database import MongoSingleton
 
 load_dotenv()
 
 cipher_suite = Fernet(os.getenv("ENCRYPTION_KEY"))
 
-from database import MongoSingleton
 
 if typing.TYPE_CHECKING:
     from POPO.Secrets import Secrets
