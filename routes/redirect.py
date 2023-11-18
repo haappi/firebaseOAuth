@@ -64,18 +64,22 @@ router.route_class = CustomRoute
 
 
 @router.get("/school/oauth/redirect/{uuid}")
-async def redirect_to_school_oauth(request: Request, code: str, data: Secrets = Depends(get_keys)):
+async def redirect_to_school_oauth(
+    request: Request, code: str, data: Secrets = Depends(get_keys)
+):
     return await handle_oauth(
         code=code,
         client_id=data.client_id,
         client_secret=data.client_secret,
         redirect_uri=parse_url(str(request.url)),
-        firebase_client_secret=data.firebase_client_secret
+        firebase_client_secret=data.firebase_client_secret,
     )
 
 
 @router.get("/school/oauth/refresh/{uuid}/{refresh_token}")
-async def refresh_users_token(request: Request, refresh_token: str, data: Secrets = Depends(get_keys)):
+async def refresh_users_token(
+    request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
+):
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
         "refresh_token": refresh_token,
@@ -89,8 +93,10 @@ async def refresh_users_token(request: Request, refresh_token: str, data: Secret
     response_json = await response.json()
 
     access_token = response_json.get("access_token")
-    user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
-                                 headers={"Authorization": f"Bearer {access_token}"})
+    user_info = await client.get(
+        "https://www.googleapis.com/oauth2/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
     user_info_json = await user_info.json()
 
     return_string = "exp://"
@@ -118,7 +124,7 @@ def generate_firebase_login_token(firebase_secret: dict, user: str, **kwargs) ->
             email_verified=kwargs.get("verified_email"),
             disabled=False,
             display_name=kwargs.get("name"),
-            app=app
+            app=app,
         )
 
     return auth.create_custom_token(user.uid).decode("utf-8")
@@ -139,8 +145,10 @@ async def handle_oauth(**kwargs):
     response_json = await response.json()
 
     access_token = response_json.get("access_token")
-    user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
-                                 headers={"Authorization": f"Bearer {access_token}"})
+    user_info = await client.get(
+        "https://www.googleapis.com/oauth2/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
     user_info_json = await user_info.json()
 
     return_string = "exp://"

@@ -45,6 +45,7 @@ async def get_mongo_instance() -> pymongo.MongoClient:
 @cached(ttl=60)
 async def get_keys_from_uuid(uuid: UUID, decrypt=False) -> "Secrets" or None:
     from POPO.Secrets import Secrets
+
     mongo = await get_mongo_instance()
     db = mongo[os.getenv("MONGO_DB_NAME")]
     collection = db["secrets"]
@@ -57,8 +58,8 @@ async def get_keys_from_uuid(uuid: UUID, decrypt=False) -> "Secrets" or None:
             if "client" in key:
                 document[key] = await decrypt_secret(value)
 
-        for key, value in document['firebase_secret'].items():
-            document['firebase_secret'][key] = await decrypt_secret(value)
+        for key, value in document["firebase_secret"].items():
+            document["firebase_secret"][key] = await decrypt_secret(value)
 
     return Secrets(**document)
 
@@ -71,8 +72,8 @@ async def insert_key(uuid: UUID, secret: "Secrets"):
     for key, value in document.items():
         if "client" in key:
             document[key] = await encrypt_secret(value)
-    for key, value in document['firebase_secret'].items():
-        document['firebase_secret'][key] = await encrypt_secret(value)
+    for key, value in document["firebase_secret"].items():
+        document["firebase_secret"][key] = await encrypt_secret(value)
     document["uuid"] = str(uuid)
     await collection.insert_one(document)
 

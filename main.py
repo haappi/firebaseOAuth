@@ -34,7 +34,8 @@ app.include_router(oauth_router)
 async def login_google(request: Request):
     return RedirectResponse(
         url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={request.url.scheme}://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
-        status_code=301)
+        status_code=301,
+    )
 
 
 @app.get("/school/oauth/auth")
@@ -54,8 +55,10 @@ async def auth_google(code: str, request: Request):
     response_json = await response.json()
     return response_json
     access_token = response_json.get("access_token")
-    user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
-                                 headers={"Authorization": f"Bearer {access_token}"})
+    user_info = await client.get(
+        "https://www.googleapis.com/oauth2/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
     user_info_json = await user_info.json()
     return user_info_json
 
