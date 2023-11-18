@@ -59,7 +59,7 @@ app = FastAPI()
 @app.get("/test")
 async def test():
     a = uuid.uuid4()
-    await insert_key(a, Secrets(client_secret="43278437843", client_id="bfsasd", owner="c", redirect_uri="d"))
+    await insert_key(a, Secrets(client_secret="43278437843", client_id="bfsasd", owner="c", firebase_client_secret="d"))
     print(await get_keys_from_uuid(a))
 
 
