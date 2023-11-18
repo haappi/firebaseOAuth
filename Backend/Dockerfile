@@ -21,7 +21,7 @@ ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
 ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
+RUN apk add --no-cache g++ build-base
 
 WORKDIR /code
 
