@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from database import AiohttpSingleton
 from routes import router as oauth_router
@@ -12,11 +13,11 @@ load_dotenv()
 app.include_router(oauth_router)
 
 
-@app.get("/login/google")
+@app.get("/school/oauth/login")
 async def login_google(request: Request):
-    return {
-        "url": f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={request.url.scheme}://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline"
-    }
+    return RedirectResponse(
+        url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={request.url.scheme}://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
+        status_code=301)
 
 
 @app.get("/school/oauth/auth")

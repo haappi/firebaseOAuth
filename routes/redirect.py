@@ -1,5 +1,4 @@
 from typing import Callable
-from urllib.parse import urlparse
 from uuid import UUID
 
 import firebase_admin
@@ -13,13 +12,13 @@ from starlette.responses import RedirectResponse
 
 from POPO.Secrets import Secrets
 from database import AiohttpSingleton
-from utils import get_keys_from_uuid
+from utils import get_keys_from_uuid, parse_url
 
 router = APIRouter()
 
 
 async def get_keys(uuid: UUID) -> Secrets:
-    data = await get_keys_from_uuid(uuid)
+    data = await get_keys_from_uuid(uuid, decrypt=True)
     if not data:
         raise HTTPException(status_code=404, detail="Redirect URI not found")
     return data
@@ -87,7 +86,7 @@ async def refresh_users_token(request: Request, refresh_token: str, data: Secret
     return RedirectResponse(url=return_string, status_code=301)
 
 
-async def generate_firebase_login_token(firebase_secret: dict, user: str, **kwargs) -> str:
+def generate_firebase_login_token(firebase_secret: dict, user: str, **kwargs) -> str:
     is_email = "@" in user
     cred = credentials.Certificate(firebase_secret)
     app = firebase_admin.initialize_app(cred)
@@ -106,11 +105,6 @@ async def generate_firebase_login_token(firebase_secret: dict, user: str, **kwar
         )
 
     return auth.create_custom_token(user.uid).decode("utf-8")
-
-
-def parse_url(url: str) -> str:
-    parsed_url = urlparse(url)
-    return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
 
 
 async def handle_oauth(**kwargs):
@@ -137,7 +131,7 @@ async def handle_oauth(**kwargs):
     for key, value in user_info_json.items():
         return_string += f"?{key}={value}&"
 
-    return_string += f"firebase_token={await generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
+    return_string += f"firebase_token={generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
 
     return_string = return_string[:-1]
 
