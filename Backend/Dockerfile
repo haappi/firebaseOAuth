@@ -21,9 +21,9 @@ ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
 ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-RUN apk update
-RUN apk upgrade
-RUN apk add --no-cache g++ build-base libffi-dev alpine-sdk
+RUN apt update
+RUN apt upgrade
+RUN apt get g++ build-base libffi-dev build-essentials python-dev
 
 WORKDIR /code
 
