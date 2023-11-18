@@ -85,17 +85,6 @@ async def insert_key(uuid: UUID, secret: "Secrets"):
     await collection.insert_one(document)
 
 
-async def retrieve_user(user_id: str) -> "User" or None:
-    mongo = await get_mongo_instance()
-    db = mongo[os.getenv("MONGO_DB_NAME")]
-    collection = db["users"]
-    document = await collection.find_one({"user_id": user_id})
-    if not document:
-        return None
-
-    return User(**document)
-
-
 async def get_secrets_for_user(user_id: str) -> typing.List["Secrets"]:
     mongo = await get_mongo_instance()
     db = mongo[os.getenv("MONGO_DB_NAME")]

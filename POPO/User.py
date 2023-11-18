@@ -31,6 +31,8 @@ class User(BaseModel):
     secrets: list[str]
     limit: int
 
+    admin: bool = False
+
     def model_dump(self, *args, **kwargs):
         return super().model_dump(*args, **kwargs, by_alias=True)
 
@@ -41,3 +43,14 @@ class User(BaseModel):
         document = self.model_dump()
 
         await collection.update_one({"user_id": self.user_id}, {"$set": document}, upsert=True)
+
+    @staticmethod
+    async def retrieve_user(user_id: str) -> "User" or None:
+        mongo = await get_mongo_instance()
+        db = mongo[os.getenv("MONGO_DB_NAME")]
+        collection = db["users"]
+        document = await collection.find_one({"user_id": user_id})
+        if not document:
+            return None
+
+        return User(**document)

@@ -27,11 +27,12 @@ async def get_current_user(response: Response, request: Request, jwt: str = Cook
 
 
 @router.get("/dashboard")
-async def test(response: Response, request: Request, current_user: str | RedirectResponse = Depends(get_current_user)):
+async def test(response: Response, request: Request, current_user: dict | RedirectResponse = Depends(get_current_user)):
     if isinstance(current_user, RedirectResponse):
         return current_user
     print(current_user)
     # Your route logic here
-    user = await User.get_user(current_user['email'])
-    return {"message": "You are authenticated!"}
+    user = await User.retrieve_user(current_user['sub'])
+    print(user)
+    return {"message": "You are authenticated!", "user": user.model_dump()}
 
