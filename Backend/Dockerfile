@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine3.18
+FROM python:3.11.6-slim
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ARG MONGO_DB_NAME
 ARG MONGO_URI
@@ -28,8 +28,8 @@ RUN apk add --no-cache g++ build-base libffi-dev alpine-sdk
 WORKDIR /code
 
 COPY requirements.txt /code/requirements.txt
-
-RUN pip install --no-cache-dir -r /code/requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY . /code
 
