@@ -63,7 +63,7 @@ class CustomRoute(APIRoute):
 router.route_class = CustomRoute
 
 
-@router.get("/school/oauth/redirect/{uuid}")
+@router.get("/redirect/{uuid}")
 async def redirect_to_school_oauth(
         request: Request, code: str, data: Secrets = Depends(get_keys)
 ):
@@ -160,4 +160,4 @@ async def handle_oauth(**kwargs):
 
     return_string = return_string[:-1]
 
-    return RedirectResponse(url=return_string, status_code=301)
+    return RedirectResponse(url=return_string, status_code=307)
