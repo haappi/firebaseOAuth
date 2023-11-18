@@ -29,13 +29,12 @@ from starlette.responses import RedirectResponse
 
 from POPO.Secrets import Secrets
 from database import AiohttpSingleton
-from utils import get_keys_from_uuid, parse_url
 
 router = APIRouter()
 
 
 async def get_keys(uuid: UUID) -> Secrets:
-    data = await get_keys_from_uuid(uuid, decrypt=True)
+    data = await Secrets.get_secret_from_uuid(uuid, decrypt=True)
     if not data:
         raise HTTPException(status_code=404, detail="Redirect URI not found")
     return data
@@ -156,7 +155,8 @@ async def handle_oauth(**kwargs):
     for key, value in user_info_json.items():
         return_string += f"?{key}={value}&"
 
-    return_string += f"firebase_token={generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
+    if kwargs.get('auto_firebase'):
+        return_string += f"firebase_token={generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
 
     return_string = return_string[:-1]
 

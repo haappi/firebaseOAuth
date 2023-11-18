@@ -48,49 +48,8 @@ async def get_mongo_instance() -> pymongo.MongoClient:
     return await MongoSingleton.get_instance()
 
 
-@cached(ttl=60)
-async def get_keys_from_uuid(uuid: UUID, decrypt=False) -> "Secrets" or None:
-    from POPO.Secrets import Secrets
-
-    mongo = await get_mongo_instance()
-    db = mongo[os.getenv("MONGO_DB_NAME")]
-    collection = db["secrets"]
-    document = await collection.find_one({"uuid": str(uuid)})
-    if not document:
-        return None
-
-    if decrypt:
-        for key, value in document.items():
-            if "client" in key:
-                document[key] = decrypt_secret(value)
-
-        for key, value in document["firebase_secret"].items():
-            document["firebase_secret"][key] = decrypt_secret(value)
-
-    return Secrets(**document)
 
 
-async def insert_key(uuid: UUID, secret: "Secrets"):
-    mongo = await get_mongo_instance()
-    db = mongo[os.getenv("MONGO_DB_NAME")]
-    collection = db["secrets"]
-    secret.uuid = str(uuid)
-    document = secret.model_dump()
-    for key, value in document.items():
-        if "client" in key:
-            document[key] = encrypt_secret(value)
-    for key, value in document["firebase_secret"].items():
-        document["firebase_secret"][key] = encrypt_secret(value)
-
-    await collection.insert_one(document)
-
-
-async def get_secrets_for_user(user_id: str) -> typing.List["Secrets"]:
-    mongo = await get_mongo_instance()
-    db = mongo[os.getenv("MONGO_DB_NAME")]
-    collection = db["secrets"]
-    documents = collection.find({"user_id": user_id})
-    return [document['uuid'] for document in documents]
 
 
 def encrypt_secret(secret: str) -> str:
@@ -139,7 +98,6 @@ async def verify_google_jwt(token, client_id):
 async def refresh_users_token(
         request: Request, refresh_token: str, response: Response
 ):
-    print('refreshing token')
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
         "refresh_token": refresh_token,
@@ -150,6 +108,10 @@ async def refresh_users_token(
     client = await AiohttpSingleton.get_instance()
 
     refresh_response = await client.post(token_url, data=data)
+
+    if refresh_response.status != 200:
+        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
+
     refresh_response_json = await refresh_response.json()
 
     response.set_cookie("refresh_token", encrypt_secret(refresh_token), httponly=True, secure=True)

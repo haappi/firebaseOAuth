@@ -15,9 +15,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
+from typing import Any
 
+from bson import ObjectId
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from utils import get_mongo_instance
 
@@ -54,3 +56,11 @@ class User(BaseModel):
             return None
 
         return User(**document)
+
+    @staticmethod
+    async def get_all_users() -> list["User"]:
+        mongo = await get_mongo_instance()
+        db = mongo[os.getenv("MONGO_DB_NAME")]
+        collection = db["users"]
+        documents = collection.find({})
+        return [User(**document) for document in documents if document]
