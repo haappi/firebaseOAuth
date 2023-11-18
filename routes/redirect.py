@@ -44,7 +44,7 @@ class CustomRoute(APIRoute):
 router.route_class = CustomRoute
 
 
-@router.get("/redirect/{uuid}")
+@router.get("/school/oauth/redirect/{uuid}")
 async def redirect_to_school_oauth(request: Request, code: str, data: Secrets = Depends(get_keys)):
     return handle_oauth(
         code=code,

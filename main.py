@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer
-import requests
 from fastapi.responses import RedirectResponse
 
 from POPO.Secrets import Secrets
