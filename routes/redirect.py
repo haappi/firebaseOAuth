@@ -2,8 +2,12 @@ from typing import Callable
 from urllib.parse import urlparse
 from uuid import UUID
 
+import firebase_admin
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.routing import APIRoute
+from firebase_admin import credentials, auth
+from firebase_admin.auth import UserNotFoundError
+from firebase_admin.exceptions import FirebaseError
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
@@ -54,6 +58,56 @@ async def redirect_to_school_oauth(request: Request, code: str, data: Secrets = 
     )
 
 
+@router.get("/school/oauth/refresh/{uuid}/{refresh_token}")
+async def refresh_users_token(request: Request, refresh_token: str, data: Secrets = Depends(get_keys)):
+    token_url = "https://accounts.google.com/o/oauth2/token"
+    data = {
+        "refresh_token": refresh_token,
+        "client_id": data.client_id,
+        "client_secret": data.client_secret,
+        "grant_type": "refresh_token",
+    }
+    client = await AiohttpSingleton.get_instance()
+
+    response = await client.post(token_url, data=data)
+    response_json = await response.json()
+
+    access_token = response_json.get("access_token")
+    user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
+                                 headers={"Authorization": f"Bearer {access_token}"})
+    user_info_json = await user_info.json()
+
+    return_string = "exp://"
+
+    for key, value in user_info_json.items():
+        return_string += f"?{key}={value}&"
+
+    return_string = return_string[:-1]
+
+    return RedirectResponse(url=return_string, status_code=301)
+
+
+async def generate_firebase_login_token(firebase_secret: dict, user: str, **kwargs) -> str:
+    is_email = "@" in user
+    cred = credentials.Certificate(firebase_secret)
+    app = firebase_admin.initialize_app(cred)
+    try:
+        if is_email:
+            user = auth.get_user_by_email(user, app=app)
+        else:  # uid
+            user = auth.get_user(user, app=app)
+    except (ValueError, UserNotFoundError, FirebaseError):
+        user = auth.create_user(
+            email=kwargs.get("email"),
+            email_verified=kwargs.get("verified_email"),
+            disabled=False,
+            display_name=kwargs.get("name"),
+            app=app
+        )
+
+    return auth.create_custom_token(user.uid).decode("utf-8")
+
+
 def parse_url(url: str) -> str:
     parsed_url = urlparse(url)
     return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
@@ -82,6 +136,8 @@ async def handle_oauth(**kwargs):
 
     for key, value in user_info_json.items():
         return_string += f"?{key}={value}&"
+
+    return_string += f"firebase_token={await generate_firebase_login_token(kwargs.get('firebase_client_secret'), user_info_json.get('email'), **user_info_json)}&"
 
     return_string = return_string[:-1]
 
