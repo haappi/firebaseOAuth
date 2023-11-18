@@ -1,8 +1,8 @@
-import asyncio
+import pprint
 from typing import Callable
+from urllib.parse import urlparse
 from uuid import UUID
 
-import aiohttp
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.routing import APIRoute
 from starlette.requests import Request
@@ -46,13 +46,18 @@ router.route_class = CustomRoute
 
 @router.get("/school/oauth/redirect/{uuid}")
 async def redirect_to_school_oauth(request: Request, code: str, data: Secrets = Depends(get_keys)):
-    return handle_oauth(
+    return await handle_oauth(
         code=code,
         client_id=data.client_id,
         client_secret=data.client_secret,
-        redirect_uri=request.url,
+        redirect_uri=parse_url(str(request.url)),
         firebase_client_secret=data.firebase_client_secret
     )
+
+
+def parse_url(url: str) -> str:
+    parsed_url = urlparse(url)
+    return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
 
 
 async def handle_oauth(**kwargs):
@@ -66,17 +71,21 @@ async def handle_oauth(**kwargs):
     }
     client = await AiohttpSingleton.get_instance()
 
-    async with client.post(token_url, data=data) as response:
-        print(await response.json())
-        access_token = (await response.json()).get("access_token")
+    response = await client.post(token_url, data=data)
+    response_json = await response.json()
+    pprint.pp(response_json)
 
-    # response = await (AiohttpSingleton.get_instance()).post(token_url, data=data)
-    # access_token = response.json().get("access_token")
-    # user_info = requests.get("https://www.googleapis.com/oauth2/v1/userinfo",
-    #                          headers={"Authorization": f"Bearer {access_token}"})
-    # jsonn = user_info.json()
-    # print(jsonn)
-    # redirect_url = f"exp://?id={jsonn['id']}&email={jsonn['email']}&name={jsonn['name']}"  # Replace with your actual redirect URL
-    # return RedirectResponse(url=redirect_url)
+    access_token = response_json.get("access_token")
+    user_info = await client.get("https://www.googleapis.com/oauth2/v1/userinfo",
+                                 headers={"Authorization": f"Bearer {access_token}"})
+    user_info_json = await user_info.json()
+    pprint.pp(user_info_json)
 
-    return user_info.json()
+    return_string = "exp://"
+
+    for key, value in user_info_json.items():
+        return_string += f"?{key}={value}&"
+
+    return_string = return_string[:-1]
+
+    return RedirectResponse(url=return_string, status_code=301)
