@@ -27,7 +27,8 @@ from starlette.responses import RedirectResponse, Response
 
 from POPO.Secrets import Secrets
 from POPO.User import User
-from utils import decrypt_secret, verify_google_jwt, refresh_users_token
+from utils import decrypt_secret, verify_google_jwt, refresh_users_token, base_url
+
 
 load_dotenv()
 
@@ -38,7 +39,7 @@ async def get_current_user(
     response: Response, request: Request, jwt: str = Cookie(None)
 ):
     if not jwt:
-        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
+        return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
     try:
         jwt: dict = await verify_google_jwt(
             decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID")
@@ -75,16 +76,16 @@ async def dashboard_view(
 async def secret_view(
     response: Response,
     request: Request,
-    uuid: str,
+    secret_uuid: str,
     current_user: User | RedirectResponse = Depends(get_current_user),
 ):
     if isinstance(current_user, RedirectResponse):
         return current_user
     try:
-        uuid = UUID(uuid)
+        secret_uuid = UUID(secret_uuid)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID")
-    secret = await Secrets.get_secret_from_uuid(uuid)
+    secret = await Secrets.get_secret_from_uuid(secret_uuid)
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
     if secret.owner != current_user.user_id:
@@ -97,16 +98,16 @@ async def secret_view(
 async def delete_secret(
     response: Response,
     request: Request,
-    uuid: str,
+    secret_uuid: str,
     current_user: User | RedirectResponse = Depends(get_current_user),
 ):
     if isinstance(current_user, RedirectResponse):
         return current_user
     try:
-        uuid = UUID(uuid)
+        secret_uuid = UUID(secret_uuid)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID")
-    secret = await Secrets.get_secret_from_uuid(uuid)
+    secret = await Secrets.get_secret_from_uuid(secret_uuid)
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
     if secret.owner != current_user.user_id:

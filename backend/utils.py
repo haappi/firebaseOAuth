@@ -25,8 +25,8 @@ from cryptography.fernet import Fernet, InvalidToken
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from google.auth import jwt
+from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
-from websockets.http11 import Request
 
 from database import MongoSingleton, AiohttpSingleton
 
@@ -42,6 +42,10 @@ load_dotenv()
 
 async def get_mongo_instance() -> pymongo.MongoClient:
     return await MongoSingleton.get_instance()
+
+
+def base_url(request: Request) -> str:
+    return "https" if request.url.scheme == "https" else "http" + "://" + request.url.netloc
 
 
 def encrypt_secret(secret: str) -> str:
@@ -100,7 +104,7 @@ async def refresh_users_token(request: Request, refresh_token: str, response: Re
     refresh_response = await client.post(token_url, data=data)
 
     if refresh_response.status != 200:
-        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
+        return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
 
     refresh_response_json = await refresh_response.json()
 
