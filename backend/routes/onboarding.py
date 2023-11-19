@@ -76,8 +76,7 @@ async def auth_google(code: str, request: Request, response: Response):
             secrets=[],
             limit=1,
         )
-
-    await user.save()
+        await user.save()
 
     response.set_cookie(
         "refresh_token",
