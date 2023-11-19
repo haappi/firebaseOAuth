@@ -38,6 +38,7 @@ router = APIRouter()
 async def get_current_user(
     response: Response, request: Request, jwt: str = Cookie(None)
 ):
+    print(f"{base_url(request)}/school/oauth/login")
     if not jwt:
         return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
     try:
