@@ -135,8 +135,6 @@ async def create_secret(
         raise HTTPException(status_code=400, detail="Invalid data")
     if not data.get("firebase_secret") and not data.get("auto_firebase"):
         raise HTTPException(status_code=400, detail="Invalid data")
-    if data.get("auto_firebase"):
-        data["firebase_secret"] = await Secrets.generate_firebase_secret()
     secret = Secrets(**data)
     secret.owner = current_user.user_id
     secret = await Secrets.insert(uuid.uuid4(), secret)
