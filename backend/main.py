@@ -17,12 +17,28 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from routes import router as oauth_router
 
 app = FastAPI()
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
+# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
+origins = [
+    "https://chicago.quack.boo",
+    "https://staging.quack.boo",
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(oauth_router)
 
 if __name__ == "__main__":
