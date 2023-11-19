@@ -38,7 +38,7 @@ async def get_current_user(
     response: Response, request: Request, jwt: str = Cookie(None)
 ):
     if not jwt:
-        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
+        return RedirectResponse(url=f"https://staging.quack.boo/school/oauth/login", status_code=307)
     try:
         jwt: dict = await verify_google_jwt(
             decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID")

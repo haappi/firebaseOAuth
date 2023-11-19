@@ -100,7 +100,7 @@ async def refresh_users_token(request: Request, refresh_token: str, response: Re
     refresh_response = await client.post(token_url, data=data)
 
     if refresh_response.status != 200:
-        return RedirectResponse(url=f"/school/oauth/login", status_code=307)
+        return RedirectResponse(url=f"https://staging.quack.boo/school/oauth/", status_code=307)
 
     refresh_response_json = await refresh_response.json()
 
