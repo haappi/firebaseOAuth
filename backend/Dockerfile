@@ -28,10 +28,11 @@ RUN apt get g++ build-base libffi-dev build-essentials python-dev
 WORKDIR /code
 
 COPY requirements.txt /code/requirements.txt
+
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-COPY ./backend /code
+COPY . /code
 
 EXPOSE 8593
 
