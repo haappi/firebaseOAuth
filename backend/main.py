@@ -21,7 +21,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from routes import router as oauth_router
 
 app = FastAPI()
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
 app.include_router(oauth_router)
 
 if __name__ == "__main__":
