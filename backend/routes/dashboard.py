@@ -20,7 +20,7 @@ import uuid
 from uuid import UUID
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Cookie, HTTPException
+from fastapi import APIRouter, Depends, Cookie, HTTPException, Header
 from google.auth.exceptions import InvalidValue
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
@@ -36,20 +36,28 @@ router = APIRouter()
 
 
 async def get_current_user(
-    response: Response, request: Request, jwt: str = Cookie(None)
+    response: Response,
+    request: Request,
+    jwt: str = Cookie(None),
+    authorization: str = Header(None),
 ):
-    if "cookie" not in request.headers.get("Cookie", ""):
-        raise HTTPException(status_code=400, detail="Cookies must be enabled")
-    if not jwt:
+    if jwt is None and authorization is None:
         return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
+
+    if authorization:
+        jwt = authorization.split("Bearer ")[-1]
+
     try:
         jwt: dict = await verify_google_jwt(
             decrypt_secret(jwt), os.getenv("GOOGLE_CLIENT_ID")
         )
     except InvalidValue:
-        await refresh_users_token(
-            request, decrypt_secret(request.cookies.get("refresh_token")), response
-        )
+        if "refresh_token" in request.cookies:
+            await refresh_users_token(
+                request, decrypt_secret(request.cookies.get("refresh_token")), response
+            )
+        else:
+            return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
 
     return await User.retrieve_user(jwt["sub"])
 
