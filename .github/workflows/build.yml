@@ -15,7 +15,7 @@ jobs:
       - name: Build Docker image
         run: |
           cd backend/
-          docker build -t google-oauth:latest . --build-arg MONGO_DB_NAME=$MONGO_DB_NAME --build-arg MONGO_URI=$MONGO_URI --build-arg GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID --build-arg GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET --build-arg ENCRYPTION_KEY=$ENCRYPTION_KEY --build-arg ALLOWED_DOMAINS=$ALLOWED_DOMAINS
+          docker build -t google-oauth:latest --build-arg MONGO_DB_NAME=$MONGO_DB_NAME --build-arg MONGO_URI=$MONGO_URI --build-arg GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID --build-arg GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET --build-arg ENCRYPTION_KEY=$ENCRYPTION_KEY --build-arg ALLOWED_DOMAINS=$ALLOWED_DOMAINS .
 #          docker build \
 #          --build-arg MONGO_DB_NAME=$MONGO_DB_NAME \
 #          --build-arg MONGO_URI=$MONGO_URI \
