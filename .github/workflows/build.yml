@@ -29,4 +29,4 @@ jobs:
           --build-arg GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
           --build-arg ENCRYPTION_KEY=$ENCRYPTION_KEY \
           --build-arg ALLOWED_DOMAINS=$ALLOWED_DOMAINS \
-          -t google-oauth-firebase:latest .
+          -t google-oauth:latest .
