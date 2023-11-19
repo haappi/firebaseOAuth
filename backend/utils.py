@@ -37,15 +37,14 @@ cipher_suite = Fernet(os.getenv("ENCRYPTION_KEY"))
 if typing.TYPE_CHECKING:
     pass
 
-load_dotenv()
-
+print(os.environ)
 
 async def get_mongo_instance() -> pymongo.MongoClient:
     return await MongoSingleton.get_instance()
 
 
 def base_url(request: Request) -> str:
-    return f"https://{request.headers.get('host')}"
+    return f"{os.getenv('PROD')}://{request.headers.get('host')}"
 
 
 def encrypt_secret(secret: str) -> str:

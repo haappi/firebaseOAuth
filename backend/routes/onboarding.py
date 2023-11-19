@@ -45,7 +45,7 @@ async def auth_google(code: str, request: Request, response: Response):
         "code": code,
         "client_id": os.getenv("GOOGLE_CLIENT_ID"),
         "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "redirect_uri": f"{request.url.scheme}://{request.url.netloc}/school/oauth/auth",
+        "redirect_uri": f"{base_url(request)}/school/oauth/auth",
         "grant_type": "authorization_code",
     }
     client = await AiohttpSingleton.get_instance()
