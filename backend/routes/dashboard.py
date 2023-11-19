@@ -42,7 +42,7 @@ async def get_current_user(
     authorization: str = Header(None),
 ):
     if jwt is None and authorization is None:
-        return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
+        return RedirectResponse(url=f"{base_url(request)}/oauth/login", status_code=307)
 
     if authorization:
         jwt = authorization.split("Bearer ")[-1]
@@ -57,7 +57,7 @@ async def get_current_user(
                 request, decrypt_secret(request.cookies.get("refresh_token")), response
             )
         else:
-            return RedirectResponse(url=f"{base_url(request)}/school/oauth/login", status_code=307)
+            return RedirectResponse(url=f"{base_url(request)}/oauth/login", status_code=307)
 
     return await User.retrieve_user(jwt["sub"])
 

@@ -33,7 +33,7 @@ router = APIRouter()
 @router.get("/login")
 async def login_google(request: Request):
     return RedirectResponse(
-        url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={base_url(request)}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
+        url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri={base_url(request)}/oauth/auth&scope=openid%20profile%20email&access_type=offline",
         status_code=301,
     )
 
@@ -45,7 +45,7 @@ async def auth_google(code: str, request: Request, response: Response):
         "code": code,
         "client_id": os.getenv("GOOGLE_CLIENT_ID"),
         "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-        "redirect_uri": f"{base_url(request)}/school/oauth/auth",
+        "redirect_uri": f"{base_url(request)}/oauth/auth",
         "grant_type": "authorization_code",
     }
     client = await AiohttpSingleton.get_instance()
@@ -87,4 +87,4 @@ async def auth_google(code: str, request: Request, response: Response):
         httponly=True,
         secure=True,
     )
-    return RedirectResponse(url=f"{base_url(request)}/school/oauth/dashboard", status_code=307)
+    return RedirectResponse(url=f"{base_url(request)}/oauth/dashboard", status_code=307)

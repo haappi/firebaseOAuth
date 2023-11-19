@@ -21,7 +21,7 @@ from routes.dashboard import router as dashboard_router
 from routes.onboarding import router as onboarding_router
 from routes.redirect_handler import router as redirect_router
 
-router = APIRouter(prefix="/school/oauth")
+router = APIRouter(prefix="/oauth")
 
 router.include_router(redirect_router)
 router.include_router(dashboard_router)

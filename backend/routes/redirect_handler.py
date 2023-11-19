@@ -76,7 +76,7 @@ async def redirect_to_school_oauth(
     )
 
 
-# @router.get("/school/oauth/refresh/{uuid}/{refresh_token}")
+# @router.get("/oauth/refresh/{uuid}/{refresh_token}")
 async def refresh_users_token(
     request: Request, refresh_token: str, data: Secrets = Depends(get_keys)
 ):
