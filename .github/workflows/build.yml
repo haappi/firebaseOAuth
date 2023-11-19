@@ -1,32 +1,32 @@
-name: Build FastAPI
-
-on:
-  push
-
-jobs:
-  build:
-    if: "!contains(github.event.head_commit.message, '[CI Skip]')"
-    runs-on: self-hosted
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Build Docker image
-        run: |
-          cd backend/
-          docker build \
-          --build-arg MONGO_DB_NAME=$MONGO_DB_NAME \
-          --build-arg MONGO_URI=$MONGO_URI \
-          --build-arg GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
-          --build-arg GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
-          --build-arg ENCRYPTION_KEY=$ENCRYPTION_KEY \
-          --build-arg ALLOWED_DOMAINS=$ALLOWED_DOMAINS \
-          -t google-oauth:latest .
-        env:
-          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-          ALLOWED_DOMAINS: ${{ secrets.ALLOWED_DOMAINS }}
+#name: Build FastAPI
+#
+#on:
+#  push
+#
+#jobs:
+#  build:
+#    if: "!contains(github.event.head_commit.message, '[CI Skip]')"
+#    runs-on: self-hosted
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Build Docker image
+#        run: |
+#          cd backend/
+#          docker build \
+#          --build-arg MONGO_DB_NAME=$MONGO_DB_NAME \
+#          --build-arg MONGO_URI=$MONGO_URI \
+#          --build-arg GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
+#          --build-arg GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
+#          --build-arg ENCRYPTION_KEY=$ENCRYPTION_KEY \
+#          --build-arg ALLOWED_DOMAINS=$ALLOWED_DOMAINS \
+#          -t google-oauth:latest .
+#        env:
+#          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+#          MONGO_URI: ${{ secrets.MONGO_URI }}
+#          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+#          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+#          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+#          ALLOWED_DOMAINS: ${{ secrets.ALLOWED_DOMAINS }}
