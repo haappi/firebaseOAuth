@@ -23,7 +23,7 @@ ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
 
 RUN apt update
 RUN apt upgrade
-RUN apt get g++ build-base libffi-dev build-essentials python-dev
+RUN apt install g++ libffi-dev -y
 
 WORKDIR /code
 
