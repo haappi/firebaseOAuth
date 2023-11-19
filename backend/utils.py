@@ -37,7 +37,7 @@ cipher_suite = Fernet(os.getenv("ENCRYPTION_KEY"))
 if typing.TYPE_CHECKING:
     pass
 
-print(os.environ)
+print(f"{os.getenv('PROD')}://{os.getenv('GOOGLE_CLIENT_ID')}:{os.getenv('ALLOWED_DOMAINS')}")
 
 async def get_mongo_instance() -> pymongo.MongoClient:
     return await MongoSingleton.get_instance()
