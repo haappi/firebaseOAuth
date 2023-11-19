@@ -14,20 +14,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from routes import router as oauth_router
-load_dotenv()
+
 app = FastAPI()
-print(f"{os.getenv('PROD')}://{os.getenv('GOOGLE_CLIENT_ID')}:{os.getenv('ALLOWED_DOMAINS')}")
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
+
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
 app.include_router(oauth_router)
 
 if __name__ == "__main__":
+    load_dotenv()
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
