@@ -87,4 +87,4 @@ async def auth_google(code: str, request: Request, response: Response):
         httponly=True,
         secure=True,
     )
-    return RedirectResponse(url=f"{base_url(request)}/school/dashboard", status_code=307)
+    return RedirectResponse(url=f"{base_url(request)}/school/oauth/dashboard", status_code=307)
