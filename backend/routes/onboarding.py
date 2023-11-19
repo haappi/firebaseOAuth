@@ -33,7 +33,7 @@ router = APIRouter()
 @router.get("/login")
 async def login_google(request: Request):
     return RedirectResponse(
-        url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri=https://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
+        url=f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={os.getenv('GOOGLE_CLIENT_ID')}&redirect_uri=http://{request.url.netloc}/school/oauth/auth&scope=openid%20profile%20email&access_type=offline",
         status_code=301,
     )
 

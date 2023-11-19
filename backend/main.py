@@ -14,6 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -22,6 +23,7 @@ from routes import router as oauth_router
 
 app = FastAPI()
 load_dotenv()
+print(os.getenv('ALLOWED_DOMAINS'))
 app.include_router(oauth_router)
 
 if __name__ == "__main__":
