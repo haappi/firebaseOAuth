@@ -58,6 +58,7 @@ async def auth_google(code: str, request: Request, response: Response):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     user_info_json = await user_info.json()
+    print(user_info_json)
     if "hd" not in user_info_json:
         user_info_json["hd"] = user_info_json["email"].split("@")[-1]
     if user_info_json["hd"] not in os.getenv("ALLOWED_DOMAINS"):
