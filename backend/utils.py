@@ -45,7 +45,7 @@ async def get_mongo_instance() -> pymongo.MongoClient:
 
 
 def base_url(request: Request) -> str:
-    return "https" if request.url.scheme == "https" else "http" + "://" + request.url.netloc
+    return "https" if os.getenv("PROD") else "http" + "://" + request.headers["host"]
 
 
 def encrypt_secret(secret: str) -> str:

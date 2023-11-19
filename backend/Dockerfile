@@ -19,6 +19,7 @@ ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
 ENV ENCRYPTION_KEY=${ENCRYPTION_KEY}
 
 ENV ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
+ENV PROD=true
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 RUN apt update
