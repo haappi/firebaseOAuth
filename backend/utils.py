@@ -45,7 +45,7 @@ async def get_mongo_instance() -> pymongo.MongoClient:
 
 
 def base_url(request: Request) -> str:
-    return f"{os.getenv('PROD')}://{request.headers.get('host')}"
+    return f"https://{request.headers.get('host')}"
 
 
 def encrypt_secret(secret: str) -> str:
