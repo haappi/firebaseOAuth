@@ -23,10 +23,9 @@ from routes import router as oauth_router
 
 app = FastAPI()
 
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["staging.quack.boo", "quack.boo", "chicago.quack.boo"])
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*.quack.boo", "localhost"])
 origins = [
-    "https://chicago.quack.boo",
-    "https://staging.quack.boo",
+    "https://*.quack.boo",
     "http://localhost",
     "http://localhost:8000",
     "http://localhost:3000",
@@ -34,7 +33,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
