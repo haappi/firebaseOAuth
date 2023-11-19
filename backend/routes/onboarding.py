@@ -21,9 +21,9 @@ from fastapi import APIRouter, HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
-from ppo.POPO.User import User
-from ppo.database import AiohttpSingleton
-from ppo.utils import encrypt_secret
+from POPO.User import User
+from database import AiohttpSingleton
+from utils import encrypt_secret
 
 load_dotenv()
 
