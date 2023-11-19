@@ -66,13 +66,17 @@ async def auth_google(code: str, request: Request, response: Response):
             status_code=403, detail="Your domain is not allowed to access this site."
         )
 
-    user = User(
-        user_id=user_info_json["id"],
-        email=user_info_json["email"],
-        name=user_info_json["name"],
-        secrets=[],
-        limit=1,
-    )
+    user = await User.retrieve_user(user_info_json["id"])
+
+    if not user:
+        user = User(
+            user_id=user_info_json["id"],
+            email=user_info_json["email"],
+            name=user_info_json["name"],
+            secrets=[],
+            limit=1,
+        )
+
     await user.save()
 
     response.set_cookie(
