@@ -72,7 +72,7 @@ async def redirect_to_school_oauth(
         client_id=data.client_id,
         client_secret=data.client_secret,
         redirect_uri=parse_url(str(request.url)),
-        firebase_client_secret=data.firebase_client_secret,
+        firebase_client_secret=None, # data.firebase_client_secret
     )
 
 
